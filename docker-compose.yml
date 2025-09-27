@@ -5,8 +5,8 @@ services:
             context: .
             dockerfile: lb.Dockerfile
         ports:
-            - target: 80
-              published: 8082
+            - target: 8080
+              published: 3000
               protocol: tcp
 
     greeting1:

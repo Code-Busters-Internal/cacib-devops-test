@@ -2,7 +2,7 @@
 using client;
 
 // The port number must match the port of the gRPC server.
-using var channel = GrpcChannel.ForAddress("http://localhost:8082");
+using var channel = GrpcChannel.ForAddress("http://localhost:3000");
 var client = new Greeter.GreeterClient(channel);
 string? me;
 do
