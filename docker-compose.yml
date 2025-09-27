@@ -1,0 +1,25 @@
+version: "3.0"
+services:
+    load-balancer:
+        build:
+            context: .
+            dockerfile: lb.Dockerfile
+        ports:
+            - target: 80
+              published: 8082
+              protocol: tcp
+              mode: host
+
+    greeting1:
+        build:
+            context: .
+            dockerfile: srv.Dockerfile
+        environment:
+          - ASPNETCORE_URLS=http://+:8100
+
+    greeting2:
+        build:
+            context: .
+            dockerfile: srv.Dockerfile
+        environment:
+          - ASPNETCORE_URLS=http://+:8200
