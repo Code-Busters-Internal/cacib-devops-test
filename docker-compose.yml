@@ -8,6 +8,9 @@ services:
             - target: 8080
               published: 3000
               protocol: tcp
+            - target: 80
+              published: 8090
+              protocol: tcp
 
     greeting1:
         build:
