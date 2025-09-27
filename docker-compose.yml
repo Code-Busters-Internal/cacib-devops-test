@@ -8,7 +8,6 @@ services:
             - target: 80
               published: 8082
               protocol: tcp
-              mode: host
 
     greeting1:
         build:
