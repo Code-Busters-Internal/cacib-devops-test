@@ -56,12 +56,13 @@ services:
 
     oauth_server:
         image: quay.io/keycloak/keycloak:latest
-        # command: show-config
-        command: start --hostname=localhost --http-enabled=true --features=token-exchange,admin
-        container_name: keycloak
+        command: start --hostname=localhost --http-enabled=true --features=token-exchange,admin --import-realm
+        volumes:
+          - ./keycloak-data/realm:/opt/keycloak/data/import/
         ports:
           - 8190:8080
         environment:
+          - KEYCLOAK_IMPORT=/opt/keycloak/data/import/devops-test.json
           - KEYCLOAK_ADMIN=admin
           - KEYCLOAK_ADMIN_PASSWORD=admin
           - KC_DB=postgres
