@@ -1,6 +1,23 @@
-version: "3.0"
 services:
+
+    greeting1:
+        container_name: greeting-1
+        build:
+            context: .
+            dockerfile: srv.Dockerfile
+        environment:
+          - ASPNETCORE_URLS=http://+:8100
+
+    greeting2:
+        container_name: greeting-2
+        build:
+            context: .
+            dockerfile: srv.Dockerfile
+        environment:
+          - ASPNETCORE_URLS=http://+:8200
+
     load-balancer:
+        container_name: ha_proxy
         build:
             context: .
             dockerfile: lb.Dockerfile
@@ -11,17 +28,49 @@ services:
             - target: 80
               published: 8090
               protocol: tcp
-
-    greeting1:
-        build:
-            context: .
-            dockerfile: srv.Dockerfile
+        depends_on:
+          - greeting1
+          - greeting2
+          - oauth_server
+          
+    database:
+        image: postgres:alpine
+        container_name: postgres
+        ports:
+          - 5432:5432
         environment:
-          - ASPNETCORE_URLS=http://+:8100
+          - POSTGRES_USER=postgres
+          - POSTGRES_PASSWORD=postgres
+        volumes:
+          - postgres:/var/lib/postgresql/data
+          - ./db-init:/docker-entrypoint-initdb.d
 
-    greeting2:
-        build:
-            context: .
-            dockerfile: srv.Dockerfile
+# For convinience
+    # adminer:
+    #   image: adminer
+    #   restart: always
+    #   ports:
+    #     - 8180:8080
+    #   depends_on:
+    #     - database
+
+    oauth_server:
+        image: quay.io/keycloak/keycloak:latest
+        # command: show-config
+        command: start --hostname=localhost --http-enabled=true --features=token-exchange,admin
+        container_name: keycloak
+        ports:
+          - 8190:8080
         environment:
-          - ASPNETCORE_URLS=http://+:8200
+          - KEYCLOAK_ADMIN=admin
+          - KEYCLOAK_ADMIN_PASSWORD=admin
+          - KC_DB=postgres
+          - KC_DB_URL_HOST=database
+          - KC_DB_URL_DATABASE=keycloak
+          - KC_DB_URL_PORT=5432
+          - KC_DB_USERNAME=keycloak
+          - KC_DB_PASSWORD=keycloak
+        depends_on:
+          - database
+volumes:
+  postgres:

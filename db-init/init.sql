@@ -1,0 +1,2 @@
+CREATE USER keycloak WITH ENCRYPTED PASSWORD 'keycloak';
+CREATE DATABASE keycloak OWNER keycloak;
