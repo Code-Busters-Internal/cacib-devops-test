@@ -21,6 +21,8 @@ services:
         build:
             context: .
             dockerfile: lb.Dockerfile
+        volumes:
+          - ./keycloak-data/keys/:/keys/public
         ports:
             - target: 8080
               published: 3000
@@ -56,12 +58,11 @@ services:
 
     oauth_server:
         image: quay.io/keycloak/keycloak:latest
-        command: start --hostname=localhost --http-enabled=true --features=token-exchange,admin --import-realm
+        command: start --hostname=localhost --http-enabled=true --features=token-exchange,admin --import-realm --proxy-headers forwarded --http-relative-path auth
         volumes:
           - ./keycloak-data/realm:/opt/keycloak/data/import/
-        ports:
-          - 8190:8080
         environment:
+          - KC_PROXY=edge
           - KEYCLOAK_IMPORT=/opt/keycloak/data/import/devops-test.json
           - KEYCLOAK_ADMIN=admin
           - KEYCLOAK_ADMIN_PASSWORD=admin

@@ -16,7 +16,7 @@ var formData = new Dictionary<string, string>
 };
 var content = new FormUrlEncodedContent(formData);
 var authReply = 
-    await httpClient.PostAsync("http://localhost:8190/realms/devops-test/protocol/openid-connect/token",  content);
+    await httpClient.PostAsync("http://localhost:8090/auth/realms/devops-test/protocol/openid-connect/token",  content);
 var jOptions = new JsonSerializerOptions
 {
     PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower
