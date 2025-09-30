@@ -16,7 +16,8 @@ var formData = new Dictionary<string, string>
 };
 var content = new FormUrlEncodedContent(formData);
 var authReply = 
-    await httpClient.PostAsync("http://localhost:8090/auth/realms/devops-test/protocol/openid-connect/token",  content);
+    await httpClient.PostAsync("http://localhost:8090/auth/realms/devops-test/protocol/openid-connect/token",
+        content);
 var jOptions = new JsonSerializerOptions
 {
     PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower
@@ -25,12 +26,11 @@ var info = await authReply.Content.ReadFromJsonAsync<OauthReply>(jOptions);
 
 if (info == null) throw new Exception("Authentication failed");
 
-// The port number must match the port of the gRPC server.
 using var channel = GrpcChannel.ForAddress("http://localhost:3000");
-// using var channel = GrpcChannel.ForAddress("http://localhost:5000");
 
-var m = new Metadata { { "Authorization", $"Bearer {info.AccessToken}" } };
+var headersMetadata = new Metadata { { "Authorization", $"Bearer {info.AccessToken}" } };
 var client = new Greeter.GreeterClient(channel);
+
 string? me;
 do
 {
@@ -38,11 +38,25 @@ do
     me = Console.ReadLine();
 } while (string.IsNullOrWhiteSpace(me));
 
-var reply = await client.SayHelloAsync(
-    new HelloRequest { Name = me }, m);
-Console.WriteLine("From server: " + reply.Message);
-Console.WriteLine("Press any key to exit...");
-Console.ReadKey();
+try
+{
+    var reply = await client.SayHelloAsync( new HelloRequest { Name = me }, headersMetadata);
+    Console.WriteLine("From server: " + reply.Message);
+    Console.WriteLine("Press any key to exit...");
+    Console.ReadKey();
+}
+catch (RpcException rpcEx)
+{
+    Console.WriteLine("Error on Grpc call: " + rpcEx.Message + " with StatusCode: " + rpcEx.StatusCode);
+    if (rpcEx.InnerException != null)
+        Console.WriteLine("Inner exception msg: " + rpcEx.InnerException.Message);
+}
+catch (Exception ex)
+{
+    Console.WriteLine("Unknown error: " + ex.Message);
+}
+
+
 
 
 
