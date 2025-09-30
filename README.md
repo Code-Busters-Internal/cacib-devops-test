@@ -60,4 +60,4 @@ To make sure to run things smoothly make sure you use dotnet 9.
 cd src/client && dotnet run
 ```
 
-Then follow instruction
+Then follow instructions
